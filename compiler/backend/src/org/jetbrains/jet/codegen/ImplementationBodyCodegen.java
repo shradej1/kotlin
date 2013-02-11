@@ -184,9 +184,16 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
     }
 
     private void writeOuterClass() {
-        ClassDescriptor container = getContainingClassDescriptor(descriptor);
-        if (container != null) {
-            v.visitOuterClass(typeMapper.mapType(container.getDefaultType(), JetTypeMapperMode.IMPL).getInternalName(), null, null);
+        //JVMS7: A class must have an EnclosingMethod attribute if and only if it is a local class or an anonymous class.
+        DeclarationDescriptor parentDescriptor = descriptor.getContainingDeclaration();
+        boolean isLocalOrAnonymousClass = !(parentDescriptor instanceof ClassDescriptor);
+        if (isLocalOrAnonymousClass) {
+            ClassDescriptor container = getContainingClassDescriptor(descriptor);
+            if (container != null) {
+                FunctionDescriptor function = getContainingFunctionDescriptor(descriptor);
+                assert function != null : "Function descriptor should be present: " + descriptor.getName();
+                v.visitOuterClass(typeMapper.mapType(container.getDefaultType(), JetTypeMapperMode.IMPL).getInternalName(), function.getName().getName(), null);
+            }
         }
     }
 
@@ -247,6 +254,16 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
         DeclarationDescriptor container = decl.getContainingDeclaration();
         while (container != null && !(container instanceof NamespaceDescriptor)) {
             if (container instanceof ClassDescriptor) return (ClassDescriptor) container;
+            container = container.getContainingDeclaration();
+        }
+        return null;
+    }
+
+    @Nullable
+    private static FunctionDescriptor getContainingFunctionDescriptor(ClassDescriptor decl) {
+        DeclarationDescriptor container = decl.getContainingDeclaration();
+        while (container != null && !(container instanceof NamespaceDescriptor)) {
+            if (container instanceof FunctionDescriptor) return (FunctionDescriptor) container;
             container = container.getContainingDeclaration();
         }
         return null;

@@ -43,6 +43,11 @@ public class CompileJavaAgainstKotlinTestGenerated extends AbstractCompileJavaAg
             JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), "org.jetbrains.jet.generators.tests.GenerateTests", new File("compiler/testData/compileJavaAgainstKotlin/class"), Pattern.compile("^(.+)\\.kt$"), true);
         }
         
+        @TestMetadata("ClassObject.kt")
+        public void testClassObject() throws Exception {
+            doTest("compiler/testData/compileJavaAgainstKotlin/class/ClassObject.kt");
+        }
+        
         @TestMetadata("DefaultConstructor.kt")
         public void testDefaultConstructor() throws Exception {
             doTest("compiler/testData/compileJavaAgainstKotlin/class/DefaultConstructor.kt");
@@ -66,6 +71,11 @@ public class CompileJavaAgainstKotlinTestGenerated extends AbstractCompileJavaAg
         @TestMetadata("ImplementsMapPP.kt")
         public void testImplementsMapPP() throws Exception {
             doTest("compiler/testData/compileJavaAgainstKotlin/class/ImplementsMapPP.kt");
+        }
+        
+        @TestMetadata("JavacError.kt")
+        public void testJavacError() throws Exception {
+            doTest("compiler/testData/compileJavaAgainstKotlin/class/JavacError.kt");
         }
         
         @TestMetadata("Simple.kt")
