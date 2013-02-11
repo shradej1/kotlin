@@ -18,6 +18,9 @@ package org.jetbrains.jet.jvm.compiler;
 
 import org.jetbrains.jet.ConfigurationKind;
 import org.jetbrains.jet.JetTestUtils;
+import org.jetbrains.jet.analyzer.AnalyzeExhaust;
+import org.jetbrains.jet.codegen.forTestCompile.ForTestCompileRuntime;
+import org.jetbrains.jet.lang.resolve.AnalyzingUtils;
 import org.jetbrains.jet.test.TestCaseWithTmpdir;
 import org.junit.Assert;
 
@@ -37,10 +40,12 @@ public abstract class AbstractCompileJavaAgainstKotlinTest extends TestCaseWithT
         Assert.assertTrue(ktFilePath.endsWith(".kt"));
         File ktFile = new File(ktFilePath);
         File javaFile = new File(ktFilePath.replaceFirst("\\.kt", ".java"));
-        compileKotlinToDirAndGetAnalyzeExhaust(ktFile, tmpdir, getTestRootDisposable(), ConfigurationKind.JDK_ONLY);
+        AnalyzeExhaust analyzeExhaust =
+                compileKotlinToDirAndGetAnalyzeExhaust(ktFile, tmpdir, getTestRootDisposable(), ConfigurationKind.JDK_ONLY);
+        AnalyzingUtils.throwExceptionOnErrors(analyzeExhaust.getBindingContext());
 
         List<String> options = Arrays.asList(
-                "-classpath", tmpdir.getPath() + System.getProperty("path.separator") + "out/production/stdlib",
+                "-classpath", tmpdir.getPath() + System.getProperty("path.separator") + ForTestCompileRuntime.runtimeJarForTests(),
                 "-d", tmpdir.getPath()
         );
         JetTestUtils.compileJavaFiles(Collections.singleton(javaFile), options);
