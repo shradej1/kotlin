@@ -192,7 +192,10 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
             if (container != null) {
                 FunctionDescriptor function = getContainingFunctionDescriptor(descriptor);
                 assert function != null : "Function descriptor should be present: " + descriptor.getName();
-                v.visitOuterClass(typeMapper.mapType(container.getDefaultType(), JetTypeMapperMode.IMPL).getInternalName(), function.getName().getName(), null);
+                Name functionName = function.getName();
+                v.visitOuterClass(typeMapper.mapType(container.getDefaultType(), JetTypeMapperMode.IMPL).getInternalName(),
+                                  functionName.getName(),
+                                  typeMapper.mapSignature(functionName, function).getAsmMethod().getDescriptor());
             }
         }
     }
