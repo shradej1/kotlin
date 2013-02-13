@@ -188,9 +188,9 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
         DeclarationDescriptor parentDescriptor = descriptor.getContainingDeclaration();
         boolean isLocalOrAnonymousClass = !(parentDescriptor instanceof ClassDescriptor);
         if (isLocalOrAnonymousClass) {
-            ClassDescriptor container = getContainingClassDescriptor(descriptor);
+            ClassDescriptor container = DescriptorUtils.getParentOfType(descriptor, ClassDescriptor.class);
             if (container != null) {
-                FunctionDescriptor function = getContainingFunctionDescriptor(descriptor);
+                FunctionDescriptor function = DescriptorUtils.getParentOfType(descriptor, FunctionDescriptor.class);
                 assert function != null : "Function descriptor should be present: " + descriptor.getName();
                 Name functionName = function.getName();
                 v.visitOuterClass(typeMapper.mapType(container.getDefaultType(), JetTypeMapperMode.IMPL).getInternalName(),
@@ -250,26 +250,6 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
         }
         annotationVisitor.visit(JvmStdlibNames.ABI_VERSION_NAME, JvmAbi.VERSION);
         annotationVisitor.visitEnd();
-    }
-
-    @Nullable
-    private static ClassDescriptor getContainingClassDescriptor(ClassDescriptor decl) {
-        DeclarationDescriptor container = decl.getContainingDeclaration();
-        while (container != null && !(container instanceof NamespaceDescriptor)) {
-            if (container instanceof ClassDescriptor) return (ClassDescriptor) container;
-            container = container.getContainingDeclaration();
-        }
-        return null;
-    }
-
-    @Nullable
-    private static FunctionDescriptor getContainingFunctionDescriptor(ClassDescriptor decl) {
-        DeclarationDescriptor container = decl.getContainingDeclaration();
-        while (container != null && !(container instanceof NamespaceDescriptor)) {
-            if (container instanceof FunctionDescriptor) return (FunctionDescriptor) container;
-            container = container.getContainingDeclaration();
-        }
-        return null;
     }
 
     private JvmClassSignature signature() {
