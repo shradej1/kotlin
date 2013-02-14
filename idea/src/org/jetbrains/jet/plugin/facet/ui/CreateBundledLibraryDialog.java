@@ -85,27 +85,6 @@ public class CreateBundledLibraryDialog extends DialogWrapper {
         LibrariesContainer.LibraryLevel libraryLevel = myNameAndLevelPanel.getLibraryLevel();
         String libraryName = myNameAndLevelPanel.getLibraryName();
 
-        library = KotlinRuntimeLibraryUtil.createRuntimeLibrary(
-                getLibraryTable(module, libraryLevel),
-                libraryName,
-                new KotlinRuntimeLibraryUtil.FindRuntimeLibraryHandler() {
-                    @Nullable
-                    @Override
-                    public File getRuntimeJarPath() {
-                        return new File(getPath(), KotlinRuntimeLibraryUtil.KOTLIN_RUNTIME_JAR);
-                    }
-
-                    @Override
-                    public void runtimePathDoesNotExist(@NotNull File path) {
-                        super.runtimePathDoesNotExist(path);
-                    }
-
-                    @Override
-                    public void ioExceptionOnCopyingJar(@NotNull IOException e) {
-                        super.ioExceptionOnCopyingJar(e);
-                    }
-                });
-
         if (library != null) {
             // Exit only if library was created successfully
             super.doOKAction();

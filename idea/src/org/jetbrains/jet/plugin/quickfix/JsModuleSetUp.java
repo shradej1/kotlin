@@ -17,6 +17,7 @@
 package org.jetbrains.jet.plugin.quickfix;
 
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
+import com.intellij.codeInspection.ModifiableModel;
 import com.intellij.facet.impl.FacetUtil;
 import com.intellij.notification.Notification;
 import com.intellij.notification.NotificationType;
@@ -29,6 +30,7 @@ import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.roots.libraries.LibraryTable;
 import com.intellij.openapi.roots.ui.configuration.projectRoot.LibrariesContainer;
 import com.intellij.openapi.roots.ui.configuration.projectRoot.LibrariesContainerFactory;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.JarFileSystem;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -77,9 +79,27 @@ public final class JsModuleSetUp {
         refreshRootDir(module, continuation);
     }
 
+    public static Library createJSLibrary(final LibraryTable table, final String libName) {
+        return ApplicationManager.getApplication().runWriteAction(new Computable<Library>() {
+            @Override
+            public Library compute() {
+                LibraryTable.ModifiableModel model = table.getModifiableModel();
+
+                Library library = model.createLibrary(libName);
+                LibrariesContainerFactory.createContainer(model).createLibrary(PathUtil.JS_LIB_JAR_NAME,
+                                                                               LibrariesContainer.LibraryLevel.MODULE, new VirtualFile[0], new VirtualFile[] { libRoot });
+                model.commit();
+
+                return library;
+            }
+        });
+    }
+
     private static void setUpLibraryAsSourceLibrary(final Module module, final @NotNull File rootDir) {
         final File libJarFile = new File(rootDir, "lib/" + PathUtil.JS_LIB_JAR_NAME);
         final VirtualFile libFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(libJarFile);
+
+        if ()
 
         if (libFile != null) {
             ApplicationManager.getApplication().runWriteAction(new Runnable() {

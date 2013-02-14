@@ -20,8 +20,13 @@ import com.intellij.openapi.module.Module;
 import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.roots.ui.configuration.projectRoot.LibrariesContainer;
 import com.intellij.util.PathUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.jet.plugin.quickfix.JsModuleSetUp;
+import org.jetbrains.jet.plugin.versions.KotlinRuntimeLibraryUtil;
 
 import java.io.File;
+import java.io.IOException;
 
 public interface BundledLibraryConfiguration {
     String getTitle();
@@ -29,7 +34,7 @@ public interface BundledLibraryConfiguration {
     LibrariesContainer.LibraryLevel getDefaultLevel();
     String getDefaultCopyPath(Module module);
 
-    Library createLibrary(String libraryName, LibrariesContainer.LibraryLevel level, String filePath);
+    Library createLibrary(@NotNull Module module, String libraryName, LibrariesContainer.LibraryLevel level, String filePath);
 
     BundledLibraryConfiguration JAVA_RUNTIME_CONFIGURATION = new BundledLibraryConfiguration() {
         @Override
@@ -53,8 +58,32 @@ public interface BundledLibraryConfiguration {
         }
 
         @Override
-        public Library createLibrary(String libraryName, LibrariesContainer.LibraryLevel level, String filePath) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        public Library createLibrary(
+                @NotNull Module module,
+                String libraryName,
+                LibrariesContainer.LibraryLevel level,
+                final String filePath
+        ) {
+            return KotlinRuntimeLibraryUtil.createRuntimeLibrary(
+                    LibraryUtils.getLibraryTable(module, level),
+                    libraryName,
+                    new KotlinRuntimeLibraryUtil.FindRuntimeLibraryHandler() {
+                        @Nullable
+                        @Override
+                        public File getRuntimeJarPath() {
+                            return new File(filePath, KotlinRuntimeLibraryUtil.KOTLIN_RUNTIME_JAR);
+                        }
+
+                        @Override
+                        public void runtimePathDoesNotExist(@NotNull File path) {
+                            super.runtimePathDoesNotExist(path);
+                        }
+
+                        @Override
+                        public void ioExceptionOnCopyingJar(@NotNull IOException e) {
+                            super.ioExceptionOnCopyingJar(e);
+                        }
+                    });
         }
     };
 
@@ -80,8 +109,15 @@ public interface BundledLibraryConfiguration {
         }
 
         @Override
-        public Library createLibrary(String libraryName, LibrariesContainer.LibraryLevel level, String filePath) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        public Library createLibrary(Module module, String libraryName, LibrariesContainer.LibraryLevel level, String filePath) {
+            JsModuleSetUp.doSetUpModule(module, new Runnable() {
+                @Override
+                public void run() {
+                    //To change body of implemented methods use File | Settings | File Templates.
+                }
+            });
+
+
         }
     };
 }
