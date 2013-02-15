@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.lang.psi.JetClass;
 import org.jetbrains.jet.lang.psi.stubs.PsiJetClassStub;
 import org.jetbrains.jet.lang.psi.stubs.elements.JetClassElementType;
+import org.jetbrains.jet.lang.resolve.name.FqName;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,8 +83,12 @@ public class PsiJetClassStubImpl extends StubBase<JetClass> implements PsiJetCla
     }
 
     @Override
-    public String getQualifiedName() {
-        return StringRef.toString(qualifiedName);
+    public FqName getFqName() {
+        String stringRef = StringRef.toString(qualifiedName);
+        if (stringRef == null) {
+            return null;
+        }
+        return new FqName(stringRef);
     }
 
     @Override
